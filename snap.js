@@ -197,15 +197,12 @@
 				if (utils.browser.version == 8 || utils.browser.version == 9){	
 				
 					if (side === 'left') { 
-						console.log("click " + utils.navigation.isOpen());
 						if(utils.navigation.isOpen()){
 							menuStyleOpened = { left: '0px' };
 							utils.navigation.setOpen(false);
-							console.log("CLose "+utils.navigation.isOpen());
 						}else {
 							menuStyleOpened = { left: settings.maxPosition + 'px' };
 							utils.navigation.setOpen(true);
-							console.log("Open "+utils.navigation.isOpen());
 						}	
 						action.animate( settings.element, menuStyleOpened, 500 );
 					} else  if (side === 'right') {
