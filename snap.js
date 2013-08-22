@@ -157,82 +157,137 @@
                 }
                 return null;
             },
-			navigation: {	
-				//Side Navigation (open or closed)
-				opened: null,
-				isOpen: function isOpen() {
-					return utils.navigation.opened;
+			/**
+			 * Support for legacy browser IE8 and IE9
+			 */
+			legacy : {
+				init: function() {
+					utils.legacy.browser.setVersion(utils.legacy.browser.getVersion());
 				},
-				setOpen: function setOpen( val ) {
-					utils.navigation.opened = val;
-				},
-				//Orientation (left or right)
-				side: '',
-				setSide: function( val ){
-					utils.navigation.side = val;
-				},
-				getSide: function() {
-					return utils.navigation.side;
-				}
-			},
-			browser: {
-				version: null,
-			    getVersion: function() {
-				   var ver = -1; // Return value assumes failure.
-				   if (navigator.appName == 'Microsoft Internet Explorer')
-				   {
-					  var ua = navigator.userAgent;
-					  var re  = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
-					  if (re.exec(ua) != null)
-						 ver = parseFloat( RegExp.$1 );
-				   }
-				   return ver;
-				},
-				setVersion: function( val ) { 
-					utils.browser.version = val;
-				}
-			},
-			handleIE: function() {	
-				var side = utils.navigation.side;
-				if (utils.browser.version == 8 || utils.browser.version == 9){	
-				
-					if (side === 'left') { 
-						if(utils.navigation.isOpen()){
-							menuStyleOpened = { left: '0px' };
-							utils.navigation.setOpen(false);
-						}else {
-							menuStyleOpened = { left: settings.maxPosition + 'px' };
-							utils.navigation.setOpen(true);
-						}	
-						action.animate( settings.element, menuStyleOpened, 500 );
-					} else  if (side === 'right') {
-						if(utils.navigation.isOpen()){
-							menuStyleOpened = { left: '0px' };
-							utils.navigation.setOpen(false);
-						}else {
-							menuStyleOpened = { left: settings.minPosition + 'px' };
-							utils.navigation.setOpen(true);
-						}	
-						action.animate( settings.element, menuStyleOpened, 500 );
+				navigation: {	
+					//Side Navigation (open or closed)
+					opened: false,
+					isOpen: function isOpen() {
+						return utils.legacy.navigation.opened;
+					},
+					setOpen: function setOpen( val ) {
+						utils.legacy.navigation.opened = val;
+					},
+					
+					//Orientation (left or right)
+					side: '',
+					setSide: function( val ){
+						utils.legacy.navigation.side = val;
+					},
+					getSide: function() {
+						return utils.legacy.navigation.side;
 					}
-				}
-			},
-			handleIETapToClose: function() {
-				var side = utils.navigation.side;
-				if (utils.browser.version == 8 || utils.browser.version == 9){	
-					if (side === 'left') { 
-						if(utils.navigation.isOpen()){
-							menuStyleOpened = { left: '0px' };
-							utils.navigation.setOpen(false);
-						}	
-						action.animate( settings.element, menuStyleOpened, 500 );
-					} else  if (side === 'right') {
-						if(utils.navigation.isOpen()){
-							menuStyleOpened = { left: '0px' };
-							utils.navigation.setOpen(false);
-						}	
-						action.animate( settings.element, menuStyleOpened, 500 );
+				},
+				browser: {
+					version: null,
+					getVersion: function() {
+					   var ver = -1; // Return value assumes failure.
+					   if (navigator.appName == 'Microsoft Internet Explorer')
+					   {
+						  var ua = navigator.userAgent;
+						  var re  = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
+						  if (re.exec(ua) != null)
+							 ver = parseFloat( RegExp.$1 );
+					   }
+					   return ver;
+					},
+					setVersion: function( val ) { 
+						utils.legacy.browser.version = val;
 					}
+				},
+				handleIE: function() {	
+					var side = utils.legacy.navigation.side;
+					if (utils.legacy.browser.version == 8 || utils.legacy.browser.version == 9){	
+						if (side === 'left') { 
+							if(utils.legacy.navigation.isOpen()){
+								menuStyleOpened = { left: '0px' };
+								utils.legacy.navigation.setOpen(false);
+							}else {
+								menuStyleOpened = { left: settings.maxPosition + 'px' };
+								utils.legacy.navigation.setOpen(true);
+							}	
+							utils.legacy.animate( settings.element, menuStyleOpened, 500 );
+						} else  if (side === 'right') {
+							if(utils.legacy.navigation.isOpen()){
+								menuStyleOpened = { left: '0px' };
+								utils.legacy.navigation.setOpen(false);
+							}else {
+								menuStyleOpened = { left: settings.minPosition + 'px' };
+								utils.legacy.navigation.setOpen(true);
+							}	
+							utils.legacy.animate( settings.element, menuStyleOpened, 500 );
+						}
+					}
+				},
+				handleIETapToClose: function() {
+					var side = utils.legacy.navigation.side;
+					if (utils.legacy.browser.version == 8 || utils.legacy.browser.version == 9){	
+						if (side === 'left') { 
+							if(utils.legacy.navigation.isOpen()){
+								menuStyleOpened = { left: '0px' };
+								utils.legacy.navigation.setOpen(false);
+							}	
+							utils.legacy.animate( settings.element, menuStyleOpened, 500 );
+						} else  if (side === 'right') {
+							if(utils.legacy.navigation.isOpen()){
+								menuStyleOpened = { left: '0px' };
+								utils.legacy.navigation.setOpen(false);
+							}	
+							utils.legacy.animate( settings.element, menuStyleOpened, 500 );
+						}
+					}
+				},
+				/**
+				 * Helper method, changes an element style over time.
+				 * http://lab.hakim.se/meny/
+				 */
+				animate: function( element, properties, duration, callback ) {
+					return (function() {
+						// Will hold start/end values for all properties
+						var interpolations = {};
+						// Format properties
+						for( var p in properties ) {
+							interpolations[p] = {
+								start: parseFloat( element.style[p] ) || 0,
+								end: parseFloat( properties[p] ),
+								unit: ( typeof properties[p] === 'string' && properties[p].match( /px|em|%/gi ) ) ? properties[p].match( /px|em|%/gi )[0] : ''
+							};
+						}
+						var animationStartTime = Date.now(),
+						animationTimeout;
+						// Takes one step forward in the animation
+						function step() {	
+							// Ease out
+							var progress = 1 - Math.pow( 1 - ( ( Date.now() - animationStartTime ) / duration ), 5 );
+							// Set style to interpolated value
+							for( var p in interpolations ) {
+								var property = interpolations[p];
+								element.style[p] = property.start + ( ( property.end - property.start ) * progress ) + property.unit;
+							}	
+							// Continue as long as we're not done
+							if( progress < 1 ) {
+								animationTimeout = setTimeout( step, 1000 / 60 );
+							}
+							else {
+								callback && callback();
+								stop();
+							}
+						}	
+						// Cancels the animation
+						function stop() {
+							clearTimeout( animationTimeout );		
+						}		
+						// Starts the animation
+						step();
+						return {
+							stop: stop
+						};
+					})();
 				}
 			}
         },
@@ -510,7 +565,7 @@
                             action.translate.easeTo(0);
 							cache.isDragging = false;
                             cache.startDragX = 0;
-							utils.handleIETapToClose();
+							utils.legacy.handleIETapToClose();
                             return;
                         }
 						
@@ -553,57 +608,11 @@
 
                     }
                 }
-			},	
-			/**
-			 * Helper method, changes an element style over time.
-			 */
-			animate: function( element, properties, duration, callback ) {
-				return (function() {
-					// Will hold start/end values for all properties
-					var interpolations = {};
-					// Format properties
-					for( var p in properties ) {
-						interpolations[p] = {
-							start: parseFloat( element.style[p] ) || 0,
-							end: parseFloat( properties[p] ),
-							unit: ( typeof properties[p] === 'string' && properties[p].match( /px|em|%/gi ) ) ? properties[p].match( /px|em|%/gi )[0] : ''
-						};
-					}
-					var animationStartTime = Date.now(),
-					animationTimeout;
-					// Takes one step forward in the animation
-					function step() {	
-						// Ease out
-						var progress = 1 - Math.pow( 1 - ( ( Date.now() - animationStartTime ) / duration ), 5 );
-						// Set style to interpolated value
-						for( var p in interpolations ) {
-							var property = interpolations[p];
-							element.style[p] = property.start + ( ( property.end - property.start ) * progress ) + property.unit;
-						}	
-						// Continue as long as we're not done
-						if( progress < 1 ) {
-							animationTimeout = setTimeout( step, 1000 / 60 );
-						}
-						else {
-							callback && callback();
-							stop();
-						}
-					}	
-					// Cancels the animation
-					function stop() {
-						clearTimeout( animationTimeout );		
-					}		
-					// Starts the animation
-					step();
-					return {
-						stop: stop
-					};
-				})();
-			}
+			}				
         },
         init = function(opts) {
             if (opts.element) {
-				utils.browser.setVersion(utils.browser.getVersion());
+				utils.legacy.init();
                 utils.deepExtend(settings, opts);
                 cache.vendor = utils.vendor();
                 action.drag.listen();
@@ -631,8 +640,8 @@
                 action.translate.easeTo(settings.minPosition);
             }
 			
-			utils.navigation.setSide(side);
-			utils.handleIE();
+			utils.legacy.navigation.setSide(side);
+			utils.legacy.handleIE();
         };
         this.close = function() {
             utils.dispatchEvent('close');
