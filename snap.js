@@ -27,6 +27,7 @@
 			minPosition: -266,
 			tapToClose: true,
 			touchToDrag: true,
+			clickToDrag: true,
 			slideIntent: 40, // degrees
 			minDragDistance: 5
 		},
@@ -50,10 +51,10 @@
         	hasTouch: (doc.ontouchstart === null),
         	eventType: function (action) {
         		var eventTypes = {
-        			down: (utils.hasTouch ? 'touchstart' : 'mousedown'),
-        			move: (utils.hasTouch ? 'touchmove' : 'mousemove'),
-        			up: (utils.hasTouch ? 'touchend' : 'mouseup'),
-        			out: (utils.hasTouch ? 'touchcancel' : 'mouseout')
+        			down: (utils.hasTouch ? 'touchstart' : settings.clickToDrag ? 'mousedown' : ''),
+        			move: (utils.hasTouch ? 'touchmove' : settings.clickToDrag ? 'mousemove' : ''),
+					up: (utils.hasTouch ? 'touchend' : settings.clickToDrag ? 'mouseup': ''),
+					out: (utils.hasTouch ? 'touchcancel' : settings.clickToDrag ? 'mouseout' : ''),
         		};
         		return eventTypes[action];
         	},
