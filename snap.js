@@ -295,9 +295,11 @@
         			}
 
         			utils.dispatchEvent('start');
-        			var key = cache.vendor + 'Transition';
-        			settings.element.style[key] = '';
-        			$(".snap-fixed").css(key, '');
+        			if (cache.canTransform) {
+        				var key = cache.vendor + 'Transition';
+        				settings.element.style[key] = '';
+        				$(".snap-fixed").css(key, '');
+        			}
 
         			cache.isDragging = true;
         			cache.hasIntent = null;
