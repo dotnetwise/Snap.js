@@ -163,7 +163,7 @@
         		get: {
         			matrix: function (index) {
 
-        				if (!utils.canTransform()) {
+        				if (!cache.canTransform) {
         					return parseInt(settings.element.style.left, 10);
         				} else {
         					var matrix = win.getComputedStyle(settings.element)[cache.vendor + 'Transform'].match(/\((.*)\)/),
@@ -197,7 +197,7 @@
         		},
         		easeTo: function (n) {
 
-        			if (!utils.canTransform()) {
+        			if (!cache.canTransform) {
         				cache.translation = n;
         				action.translate.x(n);
         			} else {
@@ -215,11 +215,12 @@
 
         				utils.events.addEvent(settings.element, utils.transitionCallback(), action.translate.easeCallback);
         				action.translate.x(n);
-        			}
-        			if (n === 0) {
-        				var key = cache.vendor + 'Transform';
-        				settings.element.style[key] = '';
-        				$(".snap-fixed").css(key, '');
+
+        				if (n === 0) {
+        					var key = cache.vendor + 'Transform';
+        					settings.element.style[key] = '';
+        					$(".snap-fixed").css(key, '');
+        				}
         			}
         		},
         		x: function (n) {
@@ -241,7 +242,7 @@
         			}
         			//alert(navigator.userAgent);
 
-        			if (utils.canTransform()) {
+        			if (cache.canTransform) {
         				var theTranslate = 'translate3d(' + n + 'px, 0,0)';
         				var key = cache.vendor + 'Transform';
         				settings.element.style[key] = theTranslate;
@@ -485,6 +486,7 @@
         	if (opts.element) {
         		utils.deepExtend(settings, opts);
         		cache.vendor = utils.vendor();
+        		cache.canTransform = utils.canTransform();
         		action.drag.listen();
         	}
         };
