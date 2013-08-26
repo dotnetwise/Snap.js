@@ -242,6 +242,12 @@
 						}
 					}
 				},
+				getDateNow: function() {
+					if (utils.legacy.browser.version == 8) {
+						return +new Date;
+					}
+					return Date.Now();
+				},
 				/**
 				 * Helper method, changes an element style over time.
 				 * http://lab.hakim.se/meny/
@@ -258,12 +264,12 @@
 								unit: ( typeof properties[p] === 'string' && properties[p].match( /px|em|%/gi ) ) ? properties[p].match( /px|em|%/gi )[0] : ''
 							};
 						}
-						var animationStartTime = Date.now(),
+						var animationStartTime = utils.legacy.getDateNow(),
 						animationTimeout;
 						// Takes one step forward in the animation
 						function step() {	
 							// Ease out
-							var progress = 1 - Math.pow( 1 - ( ( Date.now() - animationStartTime ) / duration ), 5 );
+							var progress = 1 - Math.pow( 1 - ( ( utils.legacy.getDateNow() - animationStartTime ) / duration ), 5 );
 							// Set style to interpolated value
 							for( var p in interpolations ) {
 								var property = interpolations[p];
