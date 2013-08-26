@@ -1,6 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5550D491-4BDD-45C5-82F8-E27A166DD4E5}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		component.json = component.json
+		README.md = README.md
+		snap.css = snap.css
+		snap.js = snap.js
+		snap.min.js = snap.min.js
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
