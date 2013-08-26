@@ -192,6 +192,7 @@
         				utils.klass.remove(doc.body, 'snapjs-left');
         			}
 
+        			utils.klass.remove(doc.body, 'snapjs-animating');
         			utils.dispatchEvent('animated');
         			utils.events.removeEvent(settings.element, utils.transitionCallback(), action.translate.easeCallback);
         		},
@@ -208,6 +209,8 @@
         				var easing = 'all ' + settings.transitionSpeed + 's ' + settings.easing;
         				settings.element.style[key] = easing;
         				$(".snap-fixed").css(key, easing);
+
+        				utils.klass.add(doc.body, 'snapjs-animating');
 
         				cache.animatingInterval = setInterval(function () {
         					utils.dispatchEvent('animating');
