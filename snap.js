@@ -263,12 +263,16 @@
         			cache.translation = 0;
         			cache.easing = false;
         			utils.events.addEvent(settings.element, utils.eventType('down'), action.drag.startDrag);
-        			utils.events.addEvent(settings.element, utils.eventType('move'), action.drag.dragging);
+        			if (utils.hasTouch) {
+        				utils.events.addEvent(settings.element, utils.eventType('move'), action.drag.dragging);
+        			}
         			utils.events.addEvent(settings.element, utils.eventType('up'), action.drag.endDrag);
         		},
         		stopListening: function () {
         			utils.events.removeEvent(settings.element, utils.eventType('down'), action.drag.startDrag);
-        			utils.events.removeEvent(settings.element, utils.eventType('move'), action.drag.dragging);
+        			if (utils.hasTouch) {
+        				utils.events.removeEvent(settings.element, utils.eventType('move'), action.drag.dragging);
+        			}
         			utils.events.removeEvent(settings.element, utils.eventType('up'), action.drag.endDrag);
         		},
         		startDrag: function (e) {
@@ -281,6 +285,9 @@
         				return;
         			}
 
+        			if (utils.hasTouch) {
+        				utils.events.addEvent(settings.element, utils.eventType('move'), action.drag.dragging);
+        			}
 
         			if (settings.dragger) {
         				var dragParent = utils.parentUntil(target, settings.dragger);
@@ -433,6 +440,9 @@
         			}
         		},
         		endDrag: function (e) {
+        			if (!utils.hasTouch) {
+        				utils.events.removeEvent(settings.element, utils.eventType('move'), action.drag.dragging);
+					}
         			if (cache.isDragging) {
         				utils.dispatchEvent('end');
         				var translated = action.translate.get.matrix(4);
