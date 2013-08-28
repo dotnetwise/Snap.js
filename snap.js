@@ -581,4 +581,47 @@
 			return Snap;
 		});
 	}
+	//DETECT screen orientation / maximize changes or even tab activate/deactivate
+
+	var hidden = "hidden";
+
+
+	// Standards:
+	if (hidden in document)
+		bindOnChange("visibilitychange");
+	else if ((hidden = "mozHidden") in document)
+		bindOnChange("mozvisibilitychange");
+	else if ((hidden = "webkitHidden") in document)
+		bindOnChange("webkitvisibilitychange");
+	else if ((hidden = "msHidden") in document)
+		bindOnChange("msvisibilitychange");
+		// IE 9 and lower:
+	else if ('onfocusin' in document)
+		document.onfocusin = document.onfocusout = onchange;
+		// All others:
+	else window.onpageshow = window.onpagehide = window.onfocus = window.onblur = onchange;
+
+	var v = 'tab-visible',
+		h = 'tab-hidden',
+		evtMap = {
+			focus: v,
+			focusin: v,
+			pageshow: v,
+			blur: h,
+			focusout: h,
+			pagehide: h
+		};
+	function bindOnChange(eventName) {
+		document.addEventListener(eventName, onchange);
+	}
+	function onchange(evt) {
+		evt = evt || window.event;
+		$(document.body)
+			.removeClass(v + " " + h)
+			.addClass(evt.type in evtMap
+				? evtMap[evt.type]
+				: (this[hidden]
+					? "tab-hidden"
+					: "tab-visible"));
+	}
 }).call(this, window, document);
