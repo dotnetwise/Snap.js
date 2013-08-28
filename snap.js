@@ -27,6 +27,7 @@
 			minPosition: -266,
 			tapToClose: true,
 			touchToDrag: true,
+			clickToDrag: true,
 			slideIntent: 40, // degrees
 			minDragDistance: 5
 		},
@@ -50,10 +51,10 @@
         	hasTouch: (doc.ontouchstart === null),
         	eventType: function (action) {
         		var eventTypes = {
-        			down: (utils.hasTouch ? 'touchstart' : 'mousedown'),
-        			move: (utils.hasTouch ? 'touchmove' : 'mousemove'),
-        			up: (utils.hasTouch ? 'touchend' : 'mouseup'),
-        			out: (utils.hasTouch ? 'touchcancel' : 'mouseout')
+        			down: (utils.hasTouch ? 'touchstart' : settings.clickToDrag ? 'mousedown' : ''),
+        			move: (utils.hasTouch ? 'touchmove' : settings.clickToDrag ? 'mousemove' : ''),
+					up: (utils.hasTouch ? 'touchend' : settings.clickToDrag ? 'mouseup': ''),
+					out: (utils.hasTouch ? 'touchcancel' : settings.clickToDrag ? 'mouseout' : ''),
         		};
         		return eventTypes[action];
         	},
@@ -163,7 +164,7 @@
         		get: {
         			matrix: function (index) {
 
-        				if (!utils.canTransform()) {
+        				if (!cache.canTransform) {
         					return parseInt(settings.element.style.left, 10);
         				} else {
         					var matrix = win.getComputedStyle(settings.element)[cache.vendor + 'Transform'].match(/\((.*)\)/),
@@ -192,12 +193,13 @@
         				utils.klass.remove(doc.body, 'snapjs-left');
         			}
 
+        			utils.klass.remove(doc.body, 'snapjs-animating');
         			utils.dispatchEvent('animated');
         			utils.events.removeEvent(settings.element, utils.transitionCallback(), action.translate.easeCallback);
         		},
         		easeTo: function (n) {
 
-        			if (!utils.canTransform()) {
+        			if (!cache.canTransform) {
         				cache.translation = n;
         				action.translate.x(n);
         			} else {
@@ -209,17 +211,20 @@
         				settings.element.style[key] = easing;
         				$(".snap-fixed").css(key, easing);
 
+        				utils.klass.add(doc.body, 'snapjs-animating');
+
         				cache.animatingInterval = setInterval(function () {
         					utils.dispatchEvent('animating');
         				}, 1);
 
         				utils.events.addEvent(settings.element, utils.transitionCallback(), action.translate.easeCallback);
         				action.translate.x(n);
-        			}
-        			if (n === 0) {
-        				var key = cache.vendor + 'Transform';
-        				settings.element.style[key] = '';
-        				$(".snap-fixed").css(key, '');
+
+        				if (n === 0) {
+        					var key = cache.vendor + 'Transform';
+        					settings.element.style[key] = '';
+        					$(".snap-fixed").css(key, '');
+        				}
         			}
         		},
         		x: function (n) {
@@ -241,7 +246,7 @@
         			}
         			//alert(navigator.userAgent);
 
-        			if (utils.canTransform()) {
+        			if (cache.canTransform) {
         				var theTranslate = 'translate3d(' + n + 'px, 0,0)';
         				var key = cache.vendor + 'Transform';
         				settings.element.style[key] = theTranslate;
@@ -262,12 +267,16 @@
         			cache.translation = 0;
         			cache.easing = false;
         			utils.events.addEvent(settings.element, utils.eventType('down'), action.drag.startDrag);
-        			utils.events.addEvent(settings.element, utils.eventType('move'), action.drag.dragging);
+        			if (utils.hasTouch) {
+        				utils.events.addEvent(settings.element, utils.eventType('move'), action.drag.dragging);
+        			}
         			utils.events.addEvent(settings.element, utils.eventType('up'), action.drag.endDrag);
         		},
         		stopListening: function () {
         			utils.events.removeEvent(settings.element, utils.eventType('down'), action.drag.startDrag);
-        			utils.events.removeEvent(settings.element, utils.eventType('move'), action.drag.dragging);
+        			if (utils.hasTouch) {
+        				utils.events.removeEvent(settings.element, utils.eventType('move'), action.drag.dragging);
+        			}
         			utils.events.removeEvent(settings.element, utils.eventType('up'), action.drag.endDrag);
         		},
         		startDrag: function (e) {
@@ -280,6 +289,9 @@
         				return;
         			}
 
+        			if (utils.hasTouch) {
+        				utils.events.addEvent(settings.element, utils.eventType('move'), action.drag.dragging);
+        			}
 
         			if (settings.dragger) {
         				var dragParent = utils.parentUntil(target, settings.dragger);
@@ -294,9 +306,11 @@
         			}
 
         			utils.dispatchEvent('start');
-        			var key = cache.vendor + 'Transition';
-        			settings.element.style[key] = '';
-        			$(".snap-fixed").css(key, '');
+        			if (cache.canTransform) {
+        				var key = cache.vendor + 'Transition';
+        				settings.element.style[key] = '';
+        				$(".snap-fixed").css(key, '');
+        			}
 
         			cache.isDragging = true;
         			cache.hasIntent = null;
@@ -430,6 +444,9 @@
         			}
         		},
         		endDrag: function (e) {
+        			if (!utils.hasTouch) {
+        				utils.events.removeEvent(settings.element, utils.eventType('move'), action.drag.dragging);
+					}
         			if (cache.isDragging) {
         				utils.dispatchEvent('end');
         				var translated = action.translate.get.matrix(4);
@@ -485,6 +502,7 @@
         	if (opts.element) {
         		utils.deepExtend(settings, opts);
         		cache.vendor = utils.vendor();
+        		cache.canTransform = utils.canTransform();
         		action.drag.listen();
         	}
         };
