@@ -289,7 +289,7 @@
         				return;
         			}
 
-        			if (utils.hasTouch) {
+        			if (!utils.hasTouch) {
         				utils.events.addEvent(settings.element, utils.eventType('move'), action.drag.dragging);
         			}
 
