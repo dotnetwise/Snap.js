@@ -289,7 +289,7 @@
         				return;
         			}
 
-        			if (utils.hasTouch) {
+        			if (!utils.hasTouch) {
         				utils.events.addEvent(settings.element, utils.eventType('move'), action.drag.dragging);
         			}
 
@@ -636,10 +636,8 @@
 		evt = evt || window.event;
 		$(document.body)
 			.removeClass(v + " " + h)
-			.addClass(evt.type in evtMap
+			.addClass(evt && evt.type in evtMap
 				? evtMap[evt.type]
-				: (this[hidden]
-					? "tab-hidden"
-					: "tab-visible"));
+				: (this[hidden] ? h : v));
 	}
 }).call(this, window, document);
