@@ -15,6 +15,7 @@
 	var Snap = Snap || function (userOpts) {
 		var settings = {
 			element: null,
+			element2: null,
 			dragger: null,
 			disable: 'none',
 			addBodyClasses: true,
@@ -53,8 +54,8 @@
         		var eventTypes = {
         			down: (utils.hasTouch ? 'touchstart' : settings.clickToDrag ? 'mousedown' : ''),
         			move: (utils.hasTouch ? 'touchmove' : settings.clickToDrag ? 'mousemove' : ''),
-					up: (utils.hasTouch ? 'touchend' : settings.clickToDrag ? 'mouseup': ''),
-					out: (utils.hasTouch ? 'touchcancel' : settings.clickToDrag ? 'mouseout' : ''),
+        			up: (utils.hasTouch ? 'touchend' : settings.clickToDrag ? 'mouseup' : ''),
+        			out: (utils.hasTouch ? 'touchcancel' : settings.clickToDrag ? 'mouseout' : ''),
         		};
         		return eventTypes[action];
         	},
@@ -183,7 +184,7 @@
         		easeCallback: function () {
         			var key = cache.vendor + 'Transition';
         			settings.element.style[key] = '';
-        			$(".snap-fixed").css(key, '');
+        			$(".snap-fixed, .snap-drag-me-too").css(key, '');
         			cache.translation = action.translate.get.matrix(4);
         			cache.easing = false;
         			clearInterval(cache.animatingInterval);
@@ -196,6 +197,8 @@
         			utils.klass.remove(doc.body, 'snapjs-animating');
         			utils.dispatchEvent('animated');
         			utils.events.removeEvent(settings.element, utils.transitionCallback(), action.translate.easeCallback);
+        			if (settings.element2)
+        				utils.events.removeEvent(settings.element2, utils.transitionCallback(), action.translate.easeCallback);
         		},
         		easeTo: function (n) {
 
@@ -209,7 +212,7 @@
         				var key = cache.vendor + 'Transition';
         				var easing = 'all ' + settings.transitionSpeed + 's ' + settings.easing;
         				settings.element.style[key] = easing;
-        				$(".snap-fixed").css(key, easing);
+        				$(".snap-fixed, .snap-drag-me-too").css(key, easing);
 
         				utils.klass.add(doc.body, 'snapjs-animating');
 
@@ -218,12 +221,14 @@
         				}, 1);
 
         				utils.events.addEvent(settings.element, utils.transitionCallback(), action.translate.easeCallback);
+        				if (settings.element2)
+        					utils.events.addEvent(settings.element2, utils.transitionCallback(), action.translate.easeCallback);
         				action.translate.x(n);
 
         				if (n === 0) {
         					var key = cache.vendor + 'Transform';
         					settings.element.style[key] = '';
-        					$(".snap-fixed").css(key, '');
+        					$(".snap-fixed, .snap-drag-me-too").css(key, '');
         				}
         			}
         		},
@@ -250,7 +255,7 @@
         				var theTranslate = 'translate3d(' + n + 'px, 0,0)';
         				var key = cache.vendor + 'Transform';
         				settings.element.style[key] = theTranslate;
-        				$(".snap-fixed").css(key, theTranslate);
+        				$(".snap-fixed, .snap-drag-me-too").css(key, theTranslate);
         			} else {
         				var st = element.style;
         				var style = {
@@ -258,7 +263,7 @@
         					left: st.left = n + 'px',
         					right: st.right = '',
         				}
-        				$(".snap-fixed").css(style);
+        				$(".snap-fixed, .snap-drag-me-too").css(style);
         			}
         		}
         	},
@@ -267,17 +272,29 @@
         			cache.translation = 0;
         			cache.easing = false;
         			utils.events.addEvent(settings.element, utils.eventType('down'), action.drag.startDrag);
+        			if (settings.element2)
+        				utils.events.addEvent(settings.element2, utils.eventType('down'), action.drag.startDrag);
         			if (utils.hasTouch) {
         				utils.events.addEvent(settings.element, utils.eventType('move'), action.drag.dragging);
+        				if (settings.element2)
+        					utils.events.addEvent(settings.element2, utils.eventType('move'), action.drag.dragging);
         			}
         			utils.events.addEvent(settings.element, utils.eventType('up'), action.drag.endDrag);
+        			if (settings.element2)
+        				utils.events.addEvent(settings.element2, utils.eventType('up'), action.drag.endDrag);
         		},
         		stopListening: function () {
         			utils.events.removeEvent(settings.element, utils.eventType('down'), action.drag.startDrag);
+        			if (settings.element2)
+        				utils.events.removeEvent(settings.element2, utils.eventType('down'), action.drag.startDrag);
         			if (utils.hasTouch) {
         				utils.events.removeEvent(settings.element, utils.eventType('move'), action.drag.dragging);
+        				if (settings.element2)
+        					utils.events.removeEvent(settings.element2, utils.eventType('move'), action.drag.dragging);
         			}
         			utils.events.removeEvent(settings.element, utils.eventType('up'), action.drag.endDrag);
+        			if (settings.element2)
+        				utils.events.removeEvent(settings.element2, utils.eventType('up'), action.drag.endDrag);
         		},
         		startDrag: function (e) {
         			// No drag on ignored elements
@@ -291,6 +308,8 @@
 
         			if (!utils.hasTouch) {
         				utils.events.addEvent(settings.element, utils.eventType('move'), action.drag.dragging);
+        				if (settings.element2)
+        					utils.events.addEvent(settings.element2, utils.eventType('move'), action.drag.dragging);
         			}
 
         			if (settings.dragger) {
@@ -309,7 +328,7 @@
         			if (cache.canTransform) {
         				var key = cache.vendor + 'Transition';
         				settings.element.style[key] = '';
-        				$(".snap-fixed").css(key, '');
+        				$(".snap-fixed, .snap-drag-me-too").css(key, '');
         			}
 
         			cache.isDragging = true;
@@ -446,7 +465,9 @@
         		endDrag: function (e) {
         			if (!utils.hasTouch) {
         				utils.events.removeEvent(settings.element, utils.eventType('move'), action.drag.dragging);
-					}
+        				if (settings.element2)
+        					utils.events.removeEvent(settings.element2, utils.eventType('move'), action.drag.dragging);
+        			}
         			if (cache.isDragging) {
         				utils.dispatchEvent('end');
         				var translated = action.translate.get.matrix(4);
@@ -636,10 +657,8 @@
 		evt = evt || window.event;
 		$(document.body)
 			.removeClass(v + " " + h)
-			.addClass(evt.type in evtMap
+			.addClass(evt && evt.type in evtMap
 				? evtMap[evt.type]
-				: (this[hidden]
-					? "tab-hidden"
-					: "tab-visible"));
+				: (this[hidden] ? h : v));
 	}
 }).call(this, window, document);
