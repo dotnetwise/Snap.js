@@ -607,6 +607,18 @@
 				info: cache.simpleStates
 			};
 		};
+
+		this.toggle = function (side) {
+			///<summary>Toggles the snapper (open/closed)</summary>
+			///<parameter name="side" type="String">which side to open if it's currently closed. Defaults to 'left'</parameter>
+			var side = side || 'left';
+			if (this.state().state == 'closed') {
+				this.open(side);
+			} else {
+				this.close();
+			}
+		}
+
 		init(userOpts);
 	};
 	if ((typeof module !== 'undefined') && module.exports) {
